@@ -59,6 +59,7 @@ export interface Session {
   title?: string;
   created_at: string;
   updated_at: string;
+  archived_at?: string | null;
 }
 
 // Raw event from /v1/sessions/{id}/events
