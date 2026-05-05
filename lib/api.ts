@@ -95,7 +95,7 @@ export async function createEnvironment(params: CreateEnvironmentRequest): Promi
 }
 
 export async function listSessions(): Promise<Session[]> {
-  const data = await api("/v1/sessions");
+  const data = await api("/v1/sessions?include_archived=true&limit=100");
   return data.data || [];
 }
 
