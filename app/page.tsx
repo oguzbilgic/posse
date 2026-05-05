@@ -36,7 +36,14 @@ function SessionList({
   activeSessionId: string | null;
   onSelect: (s: Session) => void;
 }) {
-  const agentSessions = sessions.filter((s) => getAgentId(s) === agentId);
+  const agentSessions = sessions
+    .filter((s) => getAgentId(s) === agentId)
+    .sort((a, b) => {
+      const aArch = a.archived_at ? 1 : 0;
+      const bArch = b.archived_at ? 1 : 0;
+      if (aArch !== bArch) return aArch - bArch;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
 
   if (agentSessions.length === 0) {
     return (
@@ -57,19 +64,20 @@ function SessionList({
             cursor: "pointer",
             background: s.id === activeSessionId ? "#252525" : "transparent",
             borderLeft: s.id === activeSessionId ? "2px solid #fcd53a" : "2px solid transparent",
+            opacity: s.archived_at ? 0.55 : 1,
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{
               width: 8, height: 8, borderRadius: "50%",
-              background: STATUS_COLORS[s.status] || "#666",
+              background: s.archived_at ? "#555" : (STATUS_COLORS[s.status] || "#666"),
             }} />
             <div style={{ fontSize: 13, color: "#eee", fontWeight: 500 }}>
               {s.title || s.id.slice(0, 20) + "…"}
             </div>
           </div>
           <div style={{ fontSize: 11, color: "#666", marginTop: 4, paddingLeft: 16 }}>
-            {s.status} · {new Date(s.created_at).toLocaleDateString()}
+            {s.archived_at ? "archived" : s.status} · {new Date(s.created_at).toLocaleDateString()}
           </div>
         </div>
       ))}
