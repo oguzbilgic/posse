@@ -15,6 +15,7 @@ interface Props {
 
   onShowMemory?: () => void;
   onShowVaults?: () => void;
+  onShowRubrics?: () => void;
   onCreateAgent?: () => void;
   onEditAgent?: (agent: Agent) => void;
   onCreateEnvironment?: () => void;
@@ -69,7 +70,7 @@ function AgentRow({ agent, active, onSelect, onEdit }: {
   );
 }
 
-export function Sidebar({ agents, environments, activeId, activeEnvId, onSelect, onSelectEnv, onShowEnvDetail, onShowMemory, onShowVaults, onCreateAgent, onEditAgent, onCreateEnvironment }: Props) {
+export function Sidebar({ agents, environments, activeId, activeEnvId, onSelect, onSelectEnv, onShowEnvDetail, onShowMemory, onShowVaults, onShowRubrics, onCreateAgent, onEditAgent, onCreateEnvironment }: Props) {
   const [showArchived, setShowArchived] = useState(false);
   const activeAgents = agents.filter((a) => !a.archived_at);
   const archivedAgents = agents.filter((a) => !!a.archived_at);
@@ -184,9 +185,22 @@ export function Sidebar({ agents, environments, activeId, activeEnvId, onSelect,
         ))}
       </div>
 
-      {/* Vaults + Memory */}
-      {(onShowVaults || onShowMemory) && (
+      {/* Vaults + Memory + Rubrics */}
+      {(onShowVaults || onShowMemory || onShowRubrics) && (
         <div style={{ padding: "8px 6px", borderTop: "1px solid #2a2a2a" }}>
+          {onShowRubrics && (
+            <div
+              onClick={onShowRubrics}
+              style={{
+                padding: "6px 8px", borderRadius: 6, cursor: "pointer",
+                fontSize: 13, color: "#888",
+                display: "flex", alignItems: "center", gap: 8,
+              }}
+            >
+              <span style={{ fontSize: 14 }}>📋</span>
+              <span style={{ flex: 1 }}>Rubrics</span>
+            </div>
+          )}
           {onShowVaults && (
             <div
               onClick={onShowVaults}

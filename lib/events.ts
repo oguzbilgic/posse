@@ -82,3 +82,38 @@ export function eventsToMessages(events: SessionEvent[]): Message[] {
 
   return messages;
 }
+
+// Full-fidelity transcript for a judge agent — unlike eventsToMessages, this
+// keeps thinking and tool calls/results verbatim, since a judge needs to see
+// what the agent actually did, not just what a human would read in the chat.
+export function eventsToTranscriptText(events: SessionEvent[]): string {
+  const lines: string[] = [];
+
+  for (const ev of events) {
+    switch (ev.type) {
+      case "user.message":
+        lines.push(`[user]\n${extractText(ev.content)}`);
+        break;
+      case "agent.message":
+        lines.push(`[assistant]\n${extractText(ev.content)}`);
+        break;
+      case "agent.thinking":
+        lines.push(`[assistant:thinking]\n${extractText(ev.content)}`);
+        break;
+      case "agent.tool_use": {
+        const input = typeof ev.input === "string" ? ev.input : JSON.stringify(ev.input);
+        lines.push(`[tool_use ${ev.name || "tool"}]\n${input}`);
+        break;
+      }
+      case "agent.tool_result": {
+        const text = extractText(ev.content);
+        lines.push(`[tool_result${ev.is_error ? " error" : ""}]\n${text}`);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  return lines.join("\n\n");
+}

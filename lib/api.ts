@@ -1,6 +1,6 @@
 // Anthropic Managed Agents API (via /api/anthropic server proxy)
 // API key is server-side only — client never sees it
-import type { Agent, AgentVersion, CreateEnvironmentRequest, Environment, Session, SessionEvent, MemoryStore, Memory, ModelInfo, McpServer, Vault, VaultCredential, SessionMemoryResource } from "./types";
+import type { Agent, AgentVersion, CreateEnvironmentRequest, Environment, Session, SessionEvent, MemoryStore, Memory, ModelInfo, McpServer, Vault, VaultCredential, SessionMemoryResource, Rubric, RubricCriterion, EvalRun } from "./types";
 
 async function api(path: string, options?: RequestInit) {
   const res = await fetch(`/api/anthropic?path=${encodeURIComponent(path)}`, {
@@ -225,4 +225,58 @@ export async function deleteMemory(storeId: string, memoryId: string): Promise<v
   await api(`/v1/memory_stores/${storeId}/memories/${memoryId}`, {
     method: "DELETE",
   });
+}
+
+// --- Rubrics + evals (posse-local routes, not proxied to Anthropic) ---
+
+async function local(path: string, options?: RequestInit) {
+  const res = await fetch(path, {
+    ...options,
+    headers: { "Content-Type": "application/json", ...options?.headers },
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function listRubrics(): Promise<Rubric[]> {
+  const data = await local("/api/rubrics");
+  return data.data || [];
+}
+
+export async function createRubric(params: {
+  name: string;
+  description?: string;
+  instructions: string;
+  criteria: RubricCriterion[];
+}): Promise<Rubric> {
+  return local("/api/rubrics", { method: "POST", body: JSON.stringify(params) });
+}
+
+export async function updateRubric(
+  id: string,
+  params: Partial<{ name: string; description?: string; instructions: string; criteria: RubricCriterion[] }>
+): Promise<Rubric> {
+  return local(`/api/rubrics/${id}`, { method: "PATCH", body: JSON.stringify(params) });
+}
+
+export async function archiveRubric(id: string): Promise<Rubric> {
+  return local(`/api/rubrics/${id}`, { method: "DELETE" });
+}
+
+export async function listEvalRuns(sessionId?: string): Promise<EvalRun[]> {
+  const qs = sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : "";
+  const data = await local(`/api/eval-runs${qs}`);
+  return data.data || [];
+}
+
+export async function createEvalRun(params: {
+  session_id: string;
+  rubric_id: string;
+  eval_agent_id: string;
+}): Promise<EvalRun> {
+  return local("/api/eval-runs", { method: "POST", body: JSON.stringify(params) });
+}
+
+export async function getEvalRun(id: string): Promise<EvalRun> {
+  return local(`/api/eval-runs/${id}`);
 }

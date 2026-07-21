@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased (fork)
+
+### Features
+- **Rubrics + evals** — Define reusable grading rubrics and trigger a model-based judge against any session's transcript. Adds posse's first local persistence (SQLite, `rubrics` + `eval_runs` tables) since everything else is fetched live from Anthropic.
+
 ## v0.2.0 - 2026-04-25
 
 ### Features

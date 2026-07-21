@@ -155,3 +155,46 @@ export interface MemoryVersion {
   path?: string;
   created_at: string;
 }
+
+// --- Rubrics + evals (posse-local, not part of the Anthropic API) ---
+
+export interface RubricCriterion {
+  id: string;
+  label: string;
+  description?: string;
+  weight?: number;
+}
+
+export interface Rubric {
+  id: string;
+  name: string;
+  description?: string;
+  instructions: string;
+  criteria: RubricCriterion[];
+  created_at: string;
+  updated_at: string;
+  archived_at: string | null;
+}
+
+export interface EvalVerdict {
+  overall_score: number;
+  pass: boolean;
+  rationale: string;
+  per_criterion: Array<{ criterion_id: string; score: number; note?: string }>;
+}
+
+export type EvalRunStatus = "pending" | "running" | "completed" | "failed";
+
+export interface EvalRun {
+  id: string;
+  session_id: string;
+  rubric_id: string;
+  eval_agent_id: string;
+  eval_session_id: string | null;
+  status: EvalRunStatus;
+  verdict: EvalVerdict | null;
+  error: string | null;
+  created_at: string;
+  updated_at: string;
+  completed_at: string | null;
+}

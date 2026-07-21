@@ -8,6 +8,8 @@ import { AgentPanel } from "../components/AgentPanel";
 import { EnvironmentPanel } from "../components/EnvironmentPanel";
 import { MemoryPanel } from "../components/MemoryPanel";
 import { VaultPanel } from "../components/VaultPanel";
+import { RubricsPanel } from "../components/RubricsPanel";
+import { EvalRunsPanel } from "../components/EvalRunsPanel";
 import { NewSessionModal } from "../components/NewSessionModal";
 import { checkConfig, listAgents, listEnvironments, listSessions, listSessionEvents, sendSessionEvent, getSession, listVaults } from "../lib/api";
 import { eventsToMessages } from "../lib/events";
@@ -92,6 +94,8 @@ export default function Home() {
   const [envDetail, setEnvDetail] = useState<Environment | null>(null);
   const [showMemory, setShowMemory] = useState(false);
   const [showVaults, setShowVaults] = useState(false);
+  const [showRubrics, setShowRubrics] = useState(false);
+  const [showEvalRuns, setShowEvalRuns] = useState(false);
   const [showNewSession, setShowNewSession] = useState(false);
   const [showEnvironmentPanel, setShowEnvironmentPanel] = useState(false);
   const [agentPanel, setAgentPanel] = useState<{ mode: "create" } | { mode: "edit"; agent: Agent } | null>(null);
@@ -206,6 +210,7 @@ export default function Home() {
         onShowEnvDetail={setEnvDetail}
         onShowMemory={() => setShowMemory(true)}
         onShowVaults={() => setShowVaults(true)}
+        onShowRubrics={() => setShowRubrics(true)}
         onCreateAgent={() => setAgentPanel({ mode: "create" })}
         onEditAgent={(a) => setAgentPanel({ mode: "edit", agent: a })}
         onCreateEnvironment={() => setShowEnvironmentPanel(true)}
@@ -336,6 +341,18 @@ export default function Home() {
         <MemoryPanel onClose={() => setShowMemory(false)} />
       )}
 
+      {showRubrics && (
+        <RubricsPanel onClose={() => setShowRubrics(false)} />
+      )}
+
+      {showEvalRuns && activeSession && (
+        <EvalRunsPanel
+          sessionId={activeSession.id}
+          agents={agents}
+          onClose={() => setShowEvalRuns(false)}
+        />
+      )}
+
       {showEnvironmentPanel && (
         <EnvironmentPanel
           onClose={() => setShowEnvironmentPanel(false)}
@@ -369,9 +386,20 @@ export default function Home() {
               {active.name}
               <span style={{ fontSize: 12, color: "#666" }}>{active.model.id}</span>
               {activeSession && (
-                <span style={{ fontSize: 11, color: "#555", marginLeft: "auto" }}>
-                  {activeSession.title || activeSession.id.slice(0, 24)}
-                </span>
+                <>
+                  <span style={{ fontSize: 11, color: "#555", marginLeft: "auto" }}>
+                    {activeSession.title || activeSession.id.slice(0, 24)}
+                  </span>
+                  <button
+                    onClick={() => setShowEvalRuns(true)}
+                    style={{
+                      background: "transparent", border: "1px solid #333", borderRadius: 6,
+                      color: "#aaa", fontSize: 12, padding: "3px 10px", cursor: "pointer",
+                    }}
+                  >
+                    Eval
+                  </button>
+                </>
               )}
             </div>
             {eventsLoading ? (

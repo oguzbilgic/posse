@@ -16,6 +16,9 @@
 # next.js
 /.next/
 
+# local sqlite store (rubrics + eval runs)
+/data/
+
 # production
 /build
 
